@@ -14,6 +14,7 @@ endif()
 if(PAHO_WITH_MQTT_C)
     # Build the paho.mqtt.c library from the submodule
     add_subdirectory(externals/paho-mqtt-c EXCLUDE_FROM_ALL)
+
     if(PAHO_BUILD_STATIC)
         if (NOT TARGET ${_PAHO_MQTT_C_LIB_NAME})
             add_library(${_PAHO_MQTT_C_LIB_NAME} STATIC externals/paho-mqtt-c/src)
@@ -30,7 +31,8 @@ if(PAHO_WITH_MQTT_C)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
     find_path(PAHO_MQTT_C_INCLUDE_DIRS NAMES MQTTAsync.h 
-        HINTS ${CMAKE_CURRENT_SOURCE_DIR}/externals/paho-mqtt-c/src)
+        HINTS ${CMAKE_CURRENT_SOURCE_DIR}/externals/paho-mqtt-c/src
+        NO_CMAKE_FIND_ROOT_PATH)
 else()
     find_library(PAHO_MQTT_C_LIBRARIES NAMES ${_PAHO_MQTT_C_LIB_NAME})
     unset(_PAHO_MQTT_C_LIB_NAME)
@@ -47,7 +49,7 @@ else()
 endif()
 
 if(PAHO_WITH_SSL)
-set_target_properties(PahoMqttC::PahoMqttC PROPERTIES
+    set_target_properties(PahoMqttC::PahoMqttC PROPERTIES
         INTERFACE_COMPILE_DEFINITIONS "OPENSSL=1"
         INTERFACE_LINK_LIBRARIES "OpenSSL::SSL;OpenSSL::Crypto")
 endif()
