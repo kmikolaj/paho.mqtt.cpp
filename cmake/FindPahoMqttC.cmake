@@ -13,8 +13,16 @@ endif()
 
 if(PAHO_WITH_MQTT_C)
     # Build the paho.mqtt.c library from the submodule
-    add_subdirectory(externals/paho-mqtt-c)
-    add_library(PahoMqttC::PahoMqttC ALIAS ${_PAHO_MQTT_C_LIB_NAME})
+    add_subdirectory(externals/paho-mqtt-c EXCLUDE_FROM_ALL)
+    if(PAHO_BUILD_STATIC)
+        if (NOT TARGET ${_PAHO_MQTT_C_LIB_NAME})
+            add_library(${_PAHO_MQTT_C_LIB_NAME} STATIC externals/paho-mqtt-c/src)
+        endif()
+    endif()
+
+    if (NOT TARGET PahoMqttC::PahoMqttC)
+        add_library(PahoMqttC::PahoMqttC ALIAS ${_PAHO_MQTT_C_LIB_NAME})
+    endif()
 
     ## install paho.mqtt.c library (appending to PahoMqttCpp export)
     install(TARGETS ${_PAHO_MQTT_C_LIB_NAME} EXPORT PahoMqttCpp
@@ -28,7 +36,9 @@ else()
     unset(_PAHO_MQTT_C_LIB_NAME)
     find_path(PAHO_MQTT_C_INCLUDE_DIRS NAMES MQTTAsync.h)
 
-    add_library(PahoMqttC::PahoMqttC UNKNOWN IMPORTED)
+    if (NOT TARGET PahoMqttC::PahoMqttC)
+        add_library(PahoMqttC::PahoMqttC UNKNOWN IMPORTED)
+    endif()
 
     set_target_properties(PahoMqttC::PahoMqttC PROPERTIES
         IMPORTED_LOCATION "${PAHO_MQTT_C_LIBRARIES}"
